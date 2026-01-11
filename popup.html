@@ -1,53 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="popup.css">
 </head>
 
 <body>
-
-    <div class="card">
-
-        <h3>Screen Color Picker</h3>
-
-        <!-- REQUIRED -->
-        <div id="preview"></div>
-
-        <!-- REQUIRED -->
-        <button id="pickBtn">Pick from Screen</button>
-
-        <!-- REQUIRED -->
-        <div class="formats">
-
-            <div class="format-row">
-                <input type="radio" name="auto" value="hex" checked>
-                <span id="hexValue">#000000</span>
-                <button class="copy-btn" data-copy="hex">Copy</button>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#logo_gradient)" />
+                    <circle cx="12" cy="12" r="6" fill="white" fill-opacity="0.9" />
+                    <defs>
+                        <linearGradient id="logo_gradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#6366f1" />
+                            <stop offset="0.5" stop-color="#a855f7" />
+                            <stop offset="1" stop-color="#ec4899" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <h1>Color Picker</h1>
             </div>
+            <button id="clearHistoryBtn" class="icon-btn" title="Clear History">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+                </svg>
+            </button>
+        </header>
 
-            <div class="format-row">
-                <input type="radio" name="auto" value="rgb">
-                <span id="rgbValue">rgb(0,0,0)</span>
-                <button class="copy-btn" data-copy="rgb">Copy</button>
+        <section class="main-display">
+            <div id="preview" class="color-preview-large"></div>
+
+            <div class="code-display">
+                <div class="tabs">
+                    <button class="tab active" data-format="hex">HEX</button>
+                    <button class="tab" data-format="rgb">RGB</button>
+                    <button class="tab" data-format="hsl">HSL</button>
+                    <button class="tab" data-format="cmyk">CMYK</button>
+                </div>
+
+                <div class="value-wrapper" id="copyArea">
+                    <span id="colorValue" class="color-value">#FFFFFF</span>
+                    <div class="copy-hint">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Click to copy
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <div class="format-row">
-                <input type="radio" name="auto" value="hsl">
-                <span id="hslValue">hsl(0,0%,0%)</span>
-                <button class="copy-btn" data-copy="hsl">Copy</button>
+        <button id="pickBtn" class="primary-btn">
+            <div class="btn-content">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5zM2 2l7.586 7.586M11 11l-9 9" />
+                </svg>
+                <span>Pick Color</span>
             </div>
+            <div class="btn-shine"></div>
+        </button>
 
+        <section class="recent-section">
+            <div class="section-title">Recent</div>
+            <div id="recent" class="recent-grid"></div>
+        </section>
+    </div>
+
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
         </div>
-
-
-        <!-- REQUIRED -->
-        <button id="recentBtn">Recent</button>
-
-        <!-- REQUIRED -->
-        <div id="recent" class="hidden"></div>
-
+        <span id="toastMsg">Copied!</span>
     </div>
 
     <script src="utils/colorUtils.js"></script>

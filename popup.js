@@ -1,34 +1,45 @@
 const pickBtn = document.getElementById("pickBtn");
 const preview = document.getElementById("preview");
-const hexEl = document.getElementById("hex");
-const rgbEl = document.getElementById("rgb");
-const hslEl = document.getElementById("hsl");
-const recentBtn = document.getElementById("recentBtn");
+const colorValueEl = document.getElementById("colorValue");
+const copyArea = document.getElementById("copyArea");
 const recentBox = document.getElementById("recent");
+const toast = document.getElementById("toast");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+const tabs = document.querySelectorAll(".tab");
 
-/* Auto-copy format (default HEX) */
-let autoCopyFormat = "hex";
+/* State */
+let currentHex = "#FFFFFF";
+let currentFormat = "hex"; // hex, rgb, hsl, cmyk
 
-/* Load saved auto-copy preference */
-chrome.storage.local.get(["autoCopyFormat"], res => {
-  if (res.autoCopyFormat) {
-    autoCopyFormat = res.autoCopyFormat;
-    document.querySelector(`input[value="${autoCopyFormat}"]`).checked = true;
+/* Load saved preference */
+chrome.storage.local.get(["lastFormat"], res => {
+  if (res.lastFormat) {
+    switchTab(res.lastFormat);
   }
 });
 
-/* Handle radio selection */
-document.querySelectorAll('input[name="autoCopy"]').forEach(radio => {
-  radio.addEventListener("change", () => {
-    autoCopyFormat = radio.value;
-    chrome.storage.local.set({ autoCopyFormat });
+/* Tab Switching */
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    switchTab(tab.dataset.format);
   });
 });
+
+function switchTab(format) {
+  currentFormat = format;
+  chrome.storage.local.set({ lastFormat: format });
+
+  // UI Update
+  tabs.forEach(t => t.classList.remove("active"));
+  document.querySelector(`.tab[data-format="${format}"]`).classList.add("active");
+
+  updateDisplay();
+}
 
 /* Pick from screen */
 pickBtn.addEventListener("click", async () => {
   if (!window.EyeDropper) {
-    alert("EyeDropper not supported");
+    showToast("EyeDropper not supported");
     return;
   }
 
@@ -36,48 +47,60 @@ pickBtn.addEventListener("click", async () => {
     const eye = new EyeDropper();
     const { sRGBHex } = await eye.open();
     applyColor(sRGBHex);
-  } catch {
-    // user cancelled
+  } catch (e) {
+    console.log(e);
   }
 });
 
 /* Apply picked color */
 function applyColor(hex) {
-  preview.style.background = hex;
-  hexEl.textContent = hex;
-
-  const rgb = hexToRgb(hex);
-  rgbEl.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-
-  const hsl = rgbToHsl(rgb);
-  hslEl.textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-
-  /* AUTO COPY SELECTED FORMAT */
-  if (autoCopyFormat === "hex") navigator.clipboard.writeText(hexEl.textContent);
-  if (autoCopyFormat === "rgb") navigator.clipboard.writeText(rgbEl.textContent);
-  if (autoCopyFormat === "hsl") navigator.clipboard.writeText(hslEl.textContent);
-
+  currentHex = hex;
+  updateDisplay();
   saveRecent(hex);
   loadRecent();
+
+  // Auto copy on pick
+  copyToClipboard(colorValueEl.textContent);
 }
 
-/* Individual copy buttons */
-document.querySelectorAll(".copy-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const type = btn.dataset.type;
-    if (type === "hex") navigator.clipboard.writeText(hexEl.textContent);
-    if (type === "rgb") navigator.clipboard.writeText(rgbEl.textContent);
-    if (type === "hsl") navigator.clipboard.writeText(hslEl.textContent);
-  });
+/* Update main display text based on current format */
+function updateDisplay() {
+  preview.style.background = currentHex;
+
+  const rgb = hexToRgb(currentHex);
+  let val = currentHex;
+
+  if (currentFormat === "rgb") {
+    val = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  } else if (currentFormat === "hsl") {
+    const hsl = rgbToHsl(rgb);
+    val = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+  } else if (currentFormat === "cmyk") {
+    const cmyk = rgbToCmyk(rgb);
+    val = `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`;
+  }
+
+  colorValueEl.textContent = val;
+}
+
+/* Copy Functionality */
+copyArea.addEventListener("click", () => {
+  copyToClipboard(colorValueEl.textContent);
 });
 
-/* Recent colors */
+function copyToClipboard(text, silent = false) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (!silent) showToast("Copied!");
+  });
+}
+
+/* Recent Colors */
 function saveRecent(color) {
   chrome.storage.local.get(["recent"], r => {
     let list = r.recent || [];
     list = list.filter(c => c !== color);
     list.unshift(color);
-    if (list.length > 25) list.pop();
+    if (list.length > 14) list.pop(); // limit to 14 (7x2 grid)
     chrome.storage.local.set({ recent: list });
   });
 }
@@ -85,16 +108,45 @@ function saveRecent(color) {
 function loadRecent() {
   chrome.storage.local.get(["recent"], r => {
     recentBox.innerHTML = "";
-    (r.recent || []).forEach(c => {
+    const list = r.recent || [];
+
+    if (list.length === 0) {
+      recentBox.innerHTML = '<span style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 11px; padding: 10px;">No recent colors</span>';
+      return;
+    }
+
+    list.forEach(c => {
       const d = document.createElement("div");
       d.style.background = c;
+      d.title = c;
       d.onclick = () => applyColor(c);
       recentBox.appendChild(d);
     });
   });
 }
 
-recentBtn.addEventListener("click", () => {
-  recentBox.classList.toggle("hidden");
-  loadRecent();
+/* Clear History */
+clearHistoryBtn.addEventListener("click", () => {
+  chrome.storage.local.set({ recent: [] }, () => {
+    loadRecent();
+    showToast("History cleared");
+  });
 });
+
+/* Toast Notification */
+let toastTimeout;
+function showToast(msg, duration = 2000) {
+  const toastMsg = document.getElementById("toastMsg");
+  if (toastMsg) toastMsg.textContent = msg;
+
+  toast.classList.add("show");
+
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, duration);
+}
+
+/* Initialize */
+loadRecent();
+updateDisplay(); /* Show default white */

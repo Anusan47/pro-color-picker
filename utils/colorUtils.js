@@ -1,3 +1,4 @@
+
 function hexToRgb(hex) {
   const v = hex.slice(1);
   return {
@@ -24,4 +25,22 @@ function rgbToHsl({r,g,b}) {
     h*=60;
   }
   return {h:Math.round(h), s:Math.round(s*100), l:Math.round(l*100)};
+}
+
+function rgbToCmyk({r, g, b}) {
+  let c = 1 - (r / 255);
+  let m = 1 - (g / 255);
+  let y = 1 - (b / 255);
+  let k = Math.min(c, Math.min(m, y));
+
+  c = (c - k) / (1 - k);
+  m = (m - k) / (1 - k);
+  y = (y - k) / (1 - k);
+
+  c = Math.round(c * 100) || 0;
+  m = Math.round(m * 100) || 0;
+  y = Math.round(y * 100) || 0;
+  k = Math.round(k * 100) || 0;
+
+  return { c, m, y, k };
 }

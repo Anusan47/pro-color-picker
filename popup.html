@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+
+    <div class="card">
+
+        <h3>Screen Color Picker</h3>
+
+        <!-- REQUIRED -->
+        <div id="preview"></div>
+
+        <!-- REQUIRED -->
+        <button id="pickBtn">Pick from Screen</button>
+
+        <!-- REQUIRED -->
+        <div class="formats">
+
+            <div class="format-row">
+                <input type="radio" name="auto" value="hex" checked>
+                <span id="hexValue">#000000</span>
+                <button class="copy-btn" data-copy="hex">Copy</button>
+            </div>
+
+            <div class="format-row">
+                <input type="radio" name="auto" value="rgb">
+                <span id="rgbValue">rgb(0,0,0)</span>
+                <button class="copy-btn" data-copy="rgb">Copy</button>
+            </div>
+
+            <div class="format-row">
+                <input type="radio" name="auto" value="hsl">
+                <span id="hslValue">hsl(0,0%,0%)</span>
+                <button class="copy-btn" data-copy="hsl">Copy</button>
+            </div>
+
+        </div>
+
+
+        <!-- REQUIRED -->
+        <button id="recentBtn">Recent</button>
+
+        <!-- REQUIRED -->
+        <div id="recent" class="hidden"></div>
+
+    </div>
+
+    <script src="utils/colorUtils.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

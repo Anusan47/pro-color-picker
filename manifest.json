@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Screen Color Picker",
+  "description": "Pick any color from anywhere on screen",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"],
+  "commands": {
+    "pick-color": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Pick color from screen"
+    }
+  }
+}

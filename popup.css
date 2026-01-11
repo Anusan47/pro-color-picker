@@ -1,0 +1,103 @@
+body {
+  width: 250px;
+  margin: 0;
+  background: #f6f6fa;
+  font-family: system-ui;
+}
+
+.card {
+  padding: 16px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#preview {
+  width: 70px;
+  height: 70px;
+  margin: 10px auto;
+  border-radius: 50%;
+  background: #ccc;
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 14px;
+  background: #5b4cf5;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.format {
+  background: #f1f1f6;
+  padding: 8px;
+  border-radius: 10px;
+  margin-top: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#recent {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+#recent div {
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+.formats {
+  margin-top: 12px;
+}
+
+.format-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f1f6;
+  padding: 8px 10px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.format-row span {
+  flex: 1;
+  font-family: monospace;
+  color: #1e1e28;
+}
+
+.copy-btn {
+  background: #5b4cf5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  opacity: 0.9;
+}
+
+.format-row input[type="radio"] {
+  accent-color: #5b4cf5;
+}
